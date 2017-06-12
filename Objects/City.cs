@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using Airline;
+using Vacation;
 
-namespace Airline.Objects
+namespace Vacation.Objects
 {
   public class City
   {
@@ -146,44 +146,28 @@ namespace Airline.Objects
       DB.CreateConnection();
       DB.OpenConnection();
 
-      SqlCommand cmd = new SqlCommand("SELECT friend_id FROM friends_cities WHERE city_id = @CityId;", DB.GetConnection());
+      SqlCommand cmd = new SqlCommand("SELECT friends.* FROM cities JOIN friends_cities ON (cities.id = friends_cities.city.id) JOIN friend ON (friends_cities.friend_id = friends.id) WHERE city.id = @CityId;", DB.GetConnection());
 
       cmd.Parameters.Add(new SqlParameter("@CityId", this.GetId()));
 
       SqlDataReader rdr = cmd.ExecuteReader();
 
-      List<int> friendIds = new List<int> {};
+      List<Friend> friends = new List<Friend> {};
 
       while (rdr.Read())
       {
         int friendId = rdr.GetInt32(0);
-        friendIds.Add(friendId);
+        string friendName = rdr.GetString(1);
+        string friendDate = rdr.GetString(2);
+        Friend newFriend = new Friend(friendName, friendDate, friendId);
+        friends.Add(newFriend);
       }
+
       if (rdr != null)
       {
         rdr.Close();
       }
 
-      List<Friend> friends = new List<Friend> {};
-
-      foreach (int friendId in friendIds)
-      {
-        SqlCommand friendQuery = new SqlCommand("SELECT * FROM friends WHERE id = @FriendId;", DB.GetConnection());
-
-        friendQuery.Parameters.Add(new SqlParameter("@FriendId", friendId));
-
-        SqlDataReader queryReader = friendQuery.ExecuteReader();
-        while (queryReader.Read())
-        {
-          int thisFriendId = queryReader.GetInt32(0);
-          string friendName = queryReader.GetString(1);
-          friends.Add(new Friend(friendName, thisFriendId));
-        }
-        if (queryReader != null)
-        {
-          queryReader.Close();
-        }
-      }
       DB.CloseConnection();
       return friends;
     }

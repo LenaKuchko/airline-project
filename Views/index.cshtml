@@ -3,42 +3,68 @@
 }
 
 <div class="row">
-  <div class="col-md-6">
-
-    @foreach(var flight in @Model["flights"])
+  <div class="col-md-3">
+    <form action="/friends/add_new" method="get">
+      <input type="hidden" name="show-info" value="friend-new">
+      <button type="submit" name="add-friend">Add friend</button>
+    </form>
+    @foreach(var friend in @Model["friends"])
     {
       <h4>
-        <form action="/flights/@flight.GetId()/info" method="get">
-          <input type="hidden" name="show-info" value="flight">
-          <button type="submit" name="button">@flight.GetName()</button>
+        <form action="/friends/@friend.GetId()/info" method="get">
+          <button type="submit" name="button">@friend.GetName()</button>
         </form></h4>
     }
-    <!-- <table class="table">
-  <thead>
-    <tr>
-      <th>#</th>
-      <th>Gate Name</th>
-      <th>Departure City</th>
-      <th>Arrival City</th>
-    </tr>
-  </thead>
-    <tbody>
-      @foreach(var flight in @Model["flights"])
-      {
-        <tr>
-        <th scope="row">@flight.GetId()</th>
-          <td>@flight.GetName()</td>
-          <td>@cities.GetFromCity()</td>
-          <td>@flight.GetToCity()</td>
-        </tr>
-      }
-    </tbody>
-  </table> -->
+
+  </div>
+  <div class="col-md-3">
+    @foreach(var city in @Model["cities"])
+    {
+      <h4>
+        <form action="/cities/@city.GetId()/info" method="get">
+          <input type="hidden" name="show-info" value="city">
+          <button type="submit" name="button">@city.GetName()</button>
+        </form></h4>
+    }
   </div>
   <div class="col-md-6">
-    @foreach(var flight in @Model["cities"])
+    @if(@Model["display"] == "friend-new")
     {
-      <h>flight.GetName()</h3>
+      <form  action="/friends/add_new" method="post">
+        <div class="form-group">
+          <label for="friend-name">Enter the friend's name</label>
+          <input type="text" name="friend-name" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="friend-date">Enter the date</label>
+          <input type="text" name="friend-date" class="form-control">
+        </div>
+        <div class="form-group">
+          <select class="form-control" name="city">
+            @foreach(var city in @Model["cities"])
+            {
+              <option value="@city.GetId()">@city.GetName()</option>
+            }
+          </select>
+        </div>
+        <button type="submit" name="button">Confirm</button>
+      </form>
+    }
+    @if(@Model["display"] == "friend-added")
+    {
+      <h3>You just added a friend!</h3>
+    }
+    @if(@Model["display"] == "friend-info")
+    {
+      <h2>@Model["selected"].GetName()</h2>
+      <h3>Most Recent Vacation: @Model["selected"].GetDate()</h3>
+        @foreach(var city in @Model["friendCities"])
+        {
+          <p>
+            test
+            @city.GetName()
+          </p>
+        }
     }
   </div>
 </div>

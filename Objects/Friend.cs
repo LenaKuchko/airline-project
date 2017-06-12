@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using Airline;
+using Vacation;
 
-namespace Airline.Objects
+namespace Vacation.Objects
 {
   public class Friend
   {
@@ -79,7 +79,7 @@ namespace Airline.Objects
         string date = rdr.GetString(2);
 
         Friend newFriend = new Friend(name, date, id);
-        allCities.Add(newFriend);
+        allFriends.Add(newFriend);
       }
 
       if (rdr != null)
@@ -97,10 +97,10 @@ namespace Airline.Objects
       DB.CreateConnection();
       DB.OpenConnection();
 
-      SqlCommand cmd = new SqlCommand("INSERT INTO friends (name, date) OUTPUT INSERTED.id VALUES (@FriendName, @FriendDate)", DB.GetConnection());
+      SqlCommand cmd = new SqlCommand("INSERT INTO friends (name, date) OUTPUT INSERTED.id VALUES (@FriendName, @FriendDate);", DB.GetConnection());
 
       cmd.Parameters.Add(new SqlParameter("@FriendName", this.GetName()));
-      cmd.Parameters.Add(new SqlParameter("@Frienddate", this.Getdate()));
+      cmd.Parameters.Add(new SqlParameter("@FriendDate", this.GetDate()));
 
 
       SqlDataReader rdr = cmd.ExecuteReader();
@@ -148,7 +148,7 @@ namespace Airline.Objects
       DB.CreateConnection();
       DB.OpenConnection();
 
-      SqlCommand cmd = new SqlCommand("INSERT INTO friends_cities (flight_id, city_id) VALUES (@FriendId, @CityId);", DB.GetConnection());
+      SqlCommand cmd = new SqlCommand("INSERT INTO friends_cities (friend_id, city_id) VALUES (@FriendId, @CityId);", DB.GetConnection());
 
       cmd.Parameters.Add(new SqlParameter("@CityId",newCity.GetId()));
       cmd.Parameters.Add(new SqlParameter("@FriendId", this.GetId()));
@@ -163,46 +163,34 @@ namespace Airline.Objects
       DB.CreateConnection();
       DB.OpenConnection();
 
-      SqlCommand cmd = new SqlCommand("SELECT city_id FROM friends_cities WHERE friend_id = @FriendId;", DB.GetConnection());
+      SqlCommand cmd = new SqlCommand("SELECT cities.* FROM friends JOIN friends_cities ON (friends.id = friends_cities.friend_id) JOIN cities ON (friends_cities.city_id = cities.id) WHERE friends.id = @FriendId;", DB.GetConnection());
+
 
       cmd.Parameters.Add(new SqlParameter("@FriendId", this.GetId()));
 
       SqlDataReader rdr = cmd.ExecuteReader();
 
-      List<int> cityIds = new List<int> {};
+      List<City> cities = new List<City> {};
 
       while (rdr.Read())
       {
         int cityId = rdr.GetInt32(0);
-        cityIds.Add(cityId);
+        string cityName = rdr.GetString(1);
+        City newCity = new City(cityName, cityId);
+        cities.Add(newCity);
       }
       if (rdr != null)
       {
         rdr.Close();
       }
 
-      List<City> cities = new List<City> {};
-
-      foreach (int cityId in cityIds)
-      {
-        SqlCommand cityQuery = new SqlCommand("SELECT * FROM cities WHERE id = @CityId;", DB.GetConnection());
-
-        cityQuery.Parameters.Add(new SqlParameter("@CityId", cityId));
-
-        SqlDataReader queryReader = cityQuery.ExecuteReader();
-        while (queryReader.Read())
-        {
-          int thisCityId = queryReader.GetInt32(0);
-          string cityName = queryReader.GetString(1);
-          cities.Add(new City(cityName, thisCityId));
-        }
-        if (queryReader != null)
-        {
-          queryReader.Close();
-        }
-      }
       DB.CloseConnection();
       return cities;
     }
   }
 }
+
+// SELECT friends.* FROM
+// cities JOIN friends_cities ON (cities.id = friends_cities.cities_id)
+//         JOIN friends ON (friends_cities.friend_id = friends.id)
+// WHERE cities.id = 3;

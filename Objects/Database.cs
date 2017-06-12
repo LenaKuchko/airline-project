@@ -1,7 +1,7 @@
 using System.Data;
 using System.Data.SqlClient;
 
-namespace Airline
+namespace Vacation
 {
   public class DB
   {
