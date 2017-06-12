@@ -1,0 +1,44 @@
+@{
+  Layout="Shared/_Layout.cshtml";
+}
+
+<div class="row">
+  <div class="col-md-6">
+
+    @foreach(var flight in @Model["flights"])
+    {
+      <h4>
+        <form action="/flights/@flight.GetId()/info" method="get">
+          <input type="hidden" name="show-info" value="flight">
+          <button type="submit" name="button">@flight.GetName()</button>
+        </form></h4>
+    }
+    <!-- <table class="table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Gate Name</th>
+      <th>Departure City</th>
+      <th>Arrival City</th>
+    </tr>
+  </thead>
+    <tbody>
+      @foreach(var flight in @Model["flights"])
+      {
+        <tr>
+        <th scope="row">@flight.GetId()</th>
+          <td>@flight.GetName()</td>
+          <td>@cities.GetFromCity()</td>
+          <td>@flight.GetToCity()</td>
+        </tr>
+      }
+    </tbody>
+  </table> -->
+  </div>
+  <div class="col-md-6">
+    @foreach(var flight in @Model["cities"])
+    {
+      <h>flight.GetName()</h3>
+    }
+  </div>
+</div>
